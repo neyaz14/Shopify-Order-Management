@@ -8,6 +8,7 @@ import ErrorPage from '../ErrorPage';
 
 import OrderManage from '../Pages/Order_Management/OrderManage';
 import Register from '../Authentication/Register';
+import UserManage from '../Pages/UserManagement/UserManage';
 
 const AppRoutes = () => {
     return (
@@ -24,6 +25,11 @@ const AppRoutes = () => {
                     <Route path='orderManage' element={
                         <PrivateRoute>
                             <OrderManage></OrderManage>
+                        </PrivateRoute>
+                    } />
+                    <Route path='userManage' element={
+                        <PrivateRoute>
+                           <UserManage></UserManage>
                         </PrivateRoute>
                     } />
 
