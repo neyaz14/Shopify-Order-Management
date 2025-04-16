@@ -17,9 +17,19 @@ const storeDetails = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-  }
+  },
+  apiVersion: {
+    type: String,
+    required: true,
+  },
+  permissions: {
+    type: String,
+    required: true,
+  },
 }, {
   timestamps: true,
 });
+
+
 
 module.exports = mongoose.model('UserStoreDetail', storeDetails);
