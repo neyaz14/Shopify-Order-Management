@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const GET_USERS = gql`
     query getUsers{
-       {
+       
         users{
             displayName
             email
@@ -10,14 +10,36 @@ export const GET_USERS = gql`
                         id
                     }
             }
+        
+    }
+`
+
+export const GET_USERS_ID = gql`
+    query getUsers{
+       
+        users{
+            id
+            email
         }
     }
 `
 
+
+
+
+
+
+
+
+
+
+
+
+
 export const GET_STORES_FULL_DATA = gql`
     query getStoresFullData{
-       {
-            {
+       
+            
                 stores{
                     storeName
                     storeUrl
@@ -30,8 +52,8 @@ export const GET_STORES_FULL_DATA = gql`
                             displayName
                         } 
                     }
-            }
-        }
+            
+        
     }
 `
 

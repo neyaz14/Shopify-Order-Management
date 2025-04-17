@@ -1,8 +1,46 @@
-import axios from 'axios';
+import { useMutation, useQuery } from '@apollo/client';
+
 
 import { useForm } from 'react-hook-form';
+import { ADD_STORE } from '../../Graphql/Mutation/userStoreMutation';
+import { GET_STORES_FULL_DATA, GET_USERS_ID } from '../../Graphql/Query/userStoreQuery';
+import { useContext } from 'react';
+import AuthContext from '../../Providers/AuthContext';
+
+
 const ModalStoreData = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { user } = useContext(AuthContext)
+  const { data: allUsers, loading: loadingUser, error: errorUser } = useQuery(GET_USERS_ID)
+  const [addStore, { loading, error }] = useMutation(ADD_STORE, {
+    update(cache, { data: { addStore } }) {
+      const { stores } = cache.readQuery({ query: GET_STORES_FULL_DATA });
+      cache.writeQuery({
+        query: GET_STORES_FULL_DATA,
+        data: { stores: [...stores, addStore] }
+      });
+    },
+    onCompleted: () => {
+      reset(); // from reset 
+      alert('Store added successfully!');
+    }
+  });
+
+  if (loading) return <span className='text-3xl p-8 text-blue-400 loading-infinity loading-xl'>Submitting store data...</span>;
+  if (loadingUser) return <span className='text-3xl p-8 text-blue-400 loading-infinity loading-xl'>Submitting store data...</span>;
+
+
+  // ! -----------------
+
+  console.log(allUsers.users)
+  const [logedInUser] = allUsers.users.filter(u => u.email === user.email)
+  console.log(logedInUser.id)
+
+
+
+
+
+
 
 
 
@@ -15,29 +53,23 @@ const ModalStoreData = () => {
 
 
   const onSubmit = async (data) => {
-    try {
-      const response = await axios.post('/api/user/shopify', {
-        query: `
-              mutation {
-                saveShopifyData(shopifyStoreUrl: "${data.shopifyStoreUrl}", accessToken: "${data.accessToken}") {
-                  success
-                  message
-                }
-              }
-            `,
-      });
-      if (response.data.data.saveShopifyData.success) {
-        console.log('Shopify data saved successfully!');
 
-        reset();
-      } else {
-        console.error('Error saving Shopify data');
-      }
-    } catch (error) {
-      console.error('Error saving Shopify data:', error);
+    try {
+      await addStore({
+        variables: {
+          storeName: data.storeName,
+          storeUrl: data.storeUrl,
+          accessToken: data.accessToken,
+          apiVersion: data.apiVersion,
+          permissions: data.permissions,
+          user: logedInUser.id // নিশ্চিত হও যে এই ID ফর্ম থেকে পাচ্ছো
+        }
+      });
+      reset()
+    } catch (err) {
+      console.error('Error adding store:', err);
     }
   };
-
 
 
 
@@ -45,6 +77,27 @@ const ModalStoreData = () => {
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+
+        {/* Store name */}
+        <div>
+          <label className="label">
+            <span className="label-text text-base-content">Shopify Name</span>
+          </label>
+          <input
+            type="text"
+            placeholder="yourstore name"
+            {...register("storeName", { required: "Store name is required" })}
+            className="input input-bordered w-full"
+          />
+          {errors.storeName && (
+            <p className="text-error text-sm">{errors.storeName.message}</p>
+          )}
+        </div>
+
+
+
+
 
         {/* Store URL */}
         <div>
@@ -61,6 +114,8 @@ const ModalStoreData = () => {
             <p className="text-error text-sm">{errors.storeUrl.message}</p>
           )}
         </div>
+
+
 
         {/* Admin API Access Token */}
         <div>
